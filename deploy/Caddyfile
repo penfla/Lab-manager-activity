@@ -1,0 +1,8 @@
+# License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright (c) 2026 Flavio Pendolino
+# https://polyformproject.org/licenses/noncommercial/1.0.0
+# Reverse proxy HTTPS (Caddy, https://caddyserver.com) davanti a SENAITE/Zope (VirtualHostMonster)
+{$SENAITE_DOMAIN} {
+	rewrite * /VirtualHostBase/https/{$SENAITE_DOMAIN}:443/senaite/VirtualHostRoot{uri}
+	reverse_proxy instance:8080
+}

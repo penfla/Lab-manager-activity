@@ -1,0 +1,43 @@
+# License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright (c) 2026 Flavio Pendolino
+# https://polyformproject.org/licenses/noncommercial/1.0.0
+#
+# SENAITE LIMS - stack ZEO + client. Immagine ufficiale: https://hub.docker.com/r/senaite/senaite
+# Sorgenti upstream: https://github.com/senaite/senaite.docker
+services:
+  zeo:
+    image: senaite/senaite:${SENAITE_VERSION:-v2.6.0}
+    command: zeo
+    restart: unless-stopped
+    volumes:
+      - senaite_data:/data
+
+  instance:
+    image: senaite/senaite:${SENAITE_VERSION:-v2.6.0}
+    restart: unless-stopped
+    depends_on: [zeo]
+    ports:
+      - "${SENAITE_BIND:-0.0.0.0}:${SENAITE_PORT:-8080}:8080"
+    environment:
+      ZEO_ADDRESS: "zeo:8080"
+      PASSWORD: "${SENAITE_ADMIN_PASSWORD:?impostare SENAITE_ADMIN_PASSWORD in .env}"
+    deploy:
+      resources:
+        limits:
+          memory: ${SENAITE_MEM_LIMIT:-2048M}
+
+  # Secondo client ZEO (opzionale): docker compose --profile scale up -d
+  instance2:
+    image: senaite/senaite:${SENAITE_VERSION:-v2.6.0}
+    profiles: [scale]
+    restart: unless-stopped
+    depends_on: [zeo]
+    ports:
+      - "${SENAITE_BIND:-0.0.0.0}:8081:8080"
+    environment:
+      ZEO_ADDRESS: "zeo:8080"
+      PASSWORD: "${SENAITE_ADMIN_PASSWORD}"
+
+volumes:
+  # Volume nativo (ext4 in WSL2): ZODB non e' affidabile su share SMB/NTFS montate.
+  senaite_data:

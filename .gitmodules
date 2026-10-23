@@ -1,0 +1,9 @@
+[submodule "upstream/senaite.core"]
+	path = upstream/senaite.core
+	url = https://github.com/senaite/senaite.core
+[submodule "upstream/senaite.lims"]
+	path = upstream/senaite.lims
+	url = https://github.com/senaite/senaite.lims
+[submodule "upstream/senaite.docker"]
+	path = upstream/senaite.docker
+	url = https://github.com/senaite/senaite.docker

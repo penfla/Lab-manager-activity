@@ -1,0 +1,20 @@
+# License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright (c) 2026 Flavio Pendolino
+# https://polyformproject.org/licenses/noncommercial/1.0.0
+#
+# Override per VM cloud (Azure/AWS/Hetzner, Linux o Windows+Docker):
+#   docker compose -f docker-compose.yml -f docker-compose.cloud.yml up -d
+# Imposta SENAITE_BIND=127.0.0.1 in .env: l'unico ingresso pubblico e' Caddy (443).
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [instance]
+    ports: ["80:80", "443:443"]
+    environment:
+      SENAITE_DOMAIN: "${SENAITE_DOMAIN:?impostare SENAITE_DOMAIN}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+volumes:
+  caddy_data:
