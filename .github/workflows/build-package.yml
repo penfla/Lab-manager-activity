@@ -9,18 +9,85 @@ on:
 permissions:
   contents: write
 jobs:
-  build:
+  rootfs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: ./packaging/build-package.sh v2.6.0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rootfs-and-scripts
+          path: packaging/dist/*
+
+  exe:
+    # IExpress (incluso in Windows) incapsula il bootstrap in un .exe. Nome SENZA "setup/install":
+    # Windows altrimenti applica l'euristica "installer detection" e chiede UAC.
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PolyLabLIMS.exe
+        shell: pwsh
+        run: |
+          $src = Resolve-Path packaging/bootstrap
+          $out = Join-Path $PWD 'PolyLabLIMS.exe'
+          $sed = @"
+          [Version]
+          Class=IEXPRESS
+          SEDVersion=3
+          [Options]
+          PackagePurpose=InstallApp
+          ShowInstallProgramWindow=1
+          HideExtractAnimation=1
+          UseLongFileName=1
+          InsideCompressed=0
+          CAB_FixedSize=0
+          CAB_ResvCodeSigning=0
+          RebootMode=N
+          InstallPrompt=%InstallPrompt%
+          DisplayLicense=%DisplayLicense%
+          FinishMessage=%FinishMessage%
+          TargetName=%TargetName%
+          FriendlyName=%FriendlyName%
+          AppLaunched=%AppLaunched%
+          PostInstallCmd=%PostInstallCmd%
+          AdminQuietInstCmd=%AdminQuietInstCmd%
+          UserQuietInstCmd=%UserQuietInstCmd%
+          SourceFiles=SourceFiles
+          [Strings]
+          InstallPrompt=
+          DisplayLicense=
+          FinishMessage=
+          TargetName=$out
+          FriendlyName=PolyLab LIMS
+          AppLaunched=cmd /c PolyLabLIMS-Bootstrap.cmd
+          PostInstallCmd=<None>
+          AdminQuietInstCmd=cmd /c PolyLabLIMS-Bootstrap.cmd
+          UserQuietInstCmd=cmd /c PolyLabLIMS-Bootstrap.cmd
+          FILE0="PolyLabLIMS-Bootstrap.cmd"
+          [SourceFiles]
+          SourceFiles0=$src\
+          [SourceFiles0]
+          %FILE0%=
+          "@ -replace '(?m)^\s+',''
+          Set-Content -Path pkg.sed -Value $sed -Encoding ascii
+          Start-Process iexpress.exe -ArgumentList '/N','/Q','pkg.sed' -Wait -NoNewWindow
+          if (-not (Test-Path $out)) { throw 'IExpress non ha prodotto l exe' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exe
+          path: PolyLabLIMS.exe
+
+  release:
+    needs: [rootfs, exe]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: assets, merge-multiple: true }
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" packaging/dist/* --title "PolyLab LIMS ${{ github.ref_name }}" --generate-notes
-      - uses: actions/upload-artifact@v4
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        with:
-          name: polylab-package
-          path: packaging/dist/*
+        run: |
+          cp packaging/bootstrap/PolyLabLIMS-Bootstrap.cmd assets/
+          gh release create "${{ github.ref_name }}" assets/* --title "PolyLab LIMS ${{ github.ref_name }}" --generate-notes

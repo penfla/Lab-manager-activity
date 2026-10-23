@@ -22,9 +22,12 @@ Il pacchetto importa una distro WSL2 dedicata in `%LOCALAPPDATA%\PolyLabLIMS` (n
 
 **Prerequisito reale:** WSL2 già abilitato (`wsl --status` senza errori; di serie su molti Windows 11). Se manca, l'abilitazione della funzionalità Windows richiede **una tantum** l'IT (`wsl --install`) — non aggirabile senza admin. Le policy aziendali (AppLocker, blocco PowerShell, virtualizzazione disattivata nel BIOS) possono impedire l'installazione.
 
-1. Scaricare da [Releases](https://github.com/penfla/Lab-manager-activity/releases) `PolyLabLIMS-Setup.zip` e `polylab-rootfs.tar.gz` (~0,6–1 GB); estrarre lo zip e mettere il `.tar.gz` nella stessa cartella (oppure lasciare scaricare allo script; per reti chiuse: copiare da share interna).
-2. Doppio clic su `Install.cmd` (opzione `-AutoStart` per l'avvio al login).
-3. Il browser si apre su http://localhost:8080 (primo avvio 1–3 min). Credenziali in `%LOCALAPPDATA%\PolyLabLIMS\credenziali.txt`; creare il sito con *Add new SENAITE Site* (id `senaite`).
+**Installazione automatica (file singolo)** — da [Releases](https://github.com/penfla/Lab-manager-activity/releases):
+
+- `PolyLabLIMS.exe` oppure `PolyLabLIMS-Bootstrap.cmd`: doppio clic. Scarica `PolyLabLIMS-Setup.zip` + `polylab-rootfs.tar.gz`, importa la distro WSL2, genera la password, crea le icone Desktop, abilita l'avvio al login e apre il browser su http://localhost:8080 (primo avvio 1–3 min). Credenziali in `%LOCALAPPDATA%\PolyLabLIMS\credenziali.txt`; poi *Add new SENAITE Site* (id `senaite`).
+- Reti chiuse o repo privato: copiare i due file di release in una share interna ed eseguire `PolyLabLIMS-Bootstrap.cmd -BaseUrl \\server\share\polylab` (opzione `-NoAutoStart` per non avviare al login).
+- Installazione manuale: estrarre lo zip, mettere accanto il `.tar.gz`, eseguire `Install.cmd`.
+- L'exe è senza "setup/install" nel nome per evitare il prompt UAC (euristica di Windows); può comunque essere bloccato da SmartScreen/antivirus perché non firmato: per la distribuzione aziendale va firmato con un certificato di code signing.
 
 | Azione | Script (in `%LOCALAPPDATA%\PolyLabLIMS\bin`) |
 |---|---|
