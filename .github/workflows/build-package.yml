@@ -1,0 +1,26 @@
+# License-Identifier: PolyForm-Noncommercial-1.0.0
+# Copyright (c) 2026 Flavio Pendolino
+# https://polyformproject.org/licenses/noncommercial/1.0.0
+name: build-package
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./packaging/build-package.sh v2.6.0
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" packaging/dist/* --title "PolyLab LIMS ${{ github.ref_name }}" --generate-notes
+      - uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: polylab-package
+          path: packaging/dist/*

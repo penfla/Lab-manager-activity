@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Flavio Pendolino
 # https://polyformproject.org/licenses/noncommercial/1.0.0
 #
-# SENAITE LIMS - stack ZEO + client. Immagine ufficiale: https://hub.docker.com/r/senaite/senaite
+# PolyLab LIMS (SENAITE) - stack ZEO + client. Immagine ufficiale: https://hub.docker.com/r/senaite/senaite
 # Sorgenti upstream: https://github.com/senaite/senaite.docker
 services:
   zeo:

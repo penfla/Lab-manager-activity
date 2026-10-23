@@ -26,8 +26,8 @@ if (-not (Test-Path .env)) {
 }
 
 if (-not $NoFirewall) {
-    if (-not (Get-NetFirewallRule -DisplayName 'SENAITE LIMS' -ErrorAction SilentlyContinue)) {
-        New-NetFirewallRule -DisplayName 'SENAITE LIMS' -Direction Inbound -Protocol TCP `
+    if (-not (Get-NetFirewallRule -DisplayName 'PolyLab LIMS' -ErrorAction SilentlyContinue)) {
+        New-NetFirewallRule -DisplayName 'PolyLab LIMS' -Direction Inbound -Protocol TCP `
             -LocalPort $Port -Profile Domain,Private -Action Allow | Out-Null
     }
 }
