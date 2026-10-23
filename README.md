@@ -22,12 +22,13 @@ Il pacchetto importa una distro WSL2 dedicata in `%LOCALAPPDATA%\PolyLabLIMS` (n
 
 **Prerequisito reale:** WSL2 già abilitato (`wsl --status` senza errori; di serie su molti Windows 11). Se manca, l'abilitazione della funzionalità Windows richiede **una tantum** l'IT (`wsl --install`) — non aggirabile senza admin. Le policy aziendali (AppLocker, blocco PowerShell, virtualizzazione disattivata nel BIOS) possono impedire l'installazione.
 
-**Installazione automatica (file singolo)** — da [Releases](https://github.com/penfla/Lab-manager-activity/releases):
+**Installer eseguibile (Windows 11/10)** — da [Releases](https://github.com/penfla/Lab-manager-activity/releases): `PolyLabLIMS-Setup.exe` (NSIS, `RequestExecutionLevel user`: nessun UAC).
 
-- `PolyLabLIMS.exe` oppure `PolyLabLIMS-Bootstrap.cmd`: doppio clic. Scarica `PolyLabLIMS-Setup.zip` + `polylab-rootfs.tar.gz`, importa la distro WSL2, genera la password, crea le icone Desktop, abilita l'avvio al login e apre il browser su http://localhost:8080 (primo avvio 1–3 min). Credenziali in `%LOCALAPPDATA%\PolyLabLIMS\credenziali.txt`; poi *Add new SENAITE Site* (id `senaite`).
-- Reti chiuse o repo privato: copiare i due file di release in una share interna ed eseguire `PolyLabLIMS-Bootstrap.cmd -BaseUrl \\server\share\polylab` (opzione `-NoAutoStart` per non avviare al login).
-- Installazione manuale: estrarre lo zip, mettere accanto il `.tar.gz`, eseguire `Install.cmd`.
-- L'exe è senza "setup/install" nel nome per evitare il prompt UAC (euristica di Windows); può comunque essere bloccato da SmartScreen/antivirus perché non firmato: per la distribuzione aziendale va firmato con un certificato di code signing.
+- Doppio clic: verifica WSL, scarica `polylab-rootfs.tar.gz` (~1 GB; se il file è già accanto all'exe viene usato, utile offline), importa la distro WSL2, genera la password, crea icone Desktop e avvio al login, apre http://localhost:8080 (primo avvio 1–3 min). Credenziali in `%LOCALAPPDATA%\PolyLabLIMS\credenziali.txt`; poi *Add new SENAITE Site* (id `senaite`).
+- Distribuzione IT/silent: `PolyLabLIMS-Setup.exe /S`.
+- Disinstallazione: *Impostazioni → App* (voce per-utente) oppure `Uninstall-PolyLab.ps1`. **Elimina anche i dati**: fare prima il backup.
+- Alternative: `PolyLabLIMS-Bootstrap.cmd [-BaseUrl \\server\share\polylab]` (scarica da share interna / repo privato), oppure zip + `Install.cmd`.
+- L'exe non è firmato: SmartScreen/antivirus possono avvisare. Per la distribuzione aziendale firmarlo (code signing).
 
 | Azione | Script (in `%LOCALAPPDATA%\PolyLabLIMS\bin`) |
 |---|---|
@@ -79,7 +80,7 @@ DNS verso la VM, porte 80/443 aperte; HTTPS Let's Encrypt via [Caddy](https://ca
 
 ```
 Author: Flavio Pendolino
-Version: 0.2.0
+Version: 0.3.0
 License: PolyForm Noncommercial 1.0.0
 Commercial use: penfla@me.com
 Purpose: distribuzione di un LIMS (SENAITE) su PC aziendali Windows, con o senza privilegi admin, accesso multi-PC (LAN/cloud)
